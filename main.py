@@ -106,13 +106,7 @@ def load_data(args):
     return data
 
 
-if __name__ == "__main__":
-    start = time.time()
-    # data = "walmart-trips-100"
-    data = "twitter"
-    # data = "cora"
-    args = parser_data(data)
-    fix_seed(args.seed)
+def main(args):
 
     # # Part 1: Load data
     data = load_data(args)
@@ -440,5 +434,29 @@ if __name__ == "__main__":
     end = time.time()
     mins = (end - start) / 60
     # print("The running time is {}".format(mins))
-    print("All done! Exit python code")
-    quit()
+
+
+if __name__ == "__main__":
+    start = time.time()
+    # data = "walmart-trips-100"
+    data = "twitter"
+    # data = "cora"
+    args = parser_data(data)
+    fix_seed(args.seed)
+    for All_num_layers in [1, 2]:
+        for heads in [1, 4, 8]:
+            for MLP_hidden in [128, 256, 512]:
+                for Classifier_hidden in [128, 256, 512]:
+                    for wd in [0.0, 0.001]:
+                        for lr in [0.01, 0.001, 0.1]:
+                            args.All_num_layers = All_num_layers
+                            args.heads = heads
+                            args.MLP_hidden = MLP_hidden
+                            args.Classifier_hidden = Classifier_hidden
+                            args.wd = wd
+                            args.lr = lr
+                            try:
+                                main(args)
+                            except:
+                                print("Error")
+                                continue

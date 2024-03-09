@@ -73,8 +73,8 @@ class SimCLRTau(nn.Module):
 
         f = lambda x: torch.exp(x / self.tau1)
 
-        refl_sim = f(sim(z1, z1).cpu())
-        between_sim = f(sim(z1, z2).cpu())
+        refl_sim = f(sim(z1, z1))
+        between_sim = f(sim(z1, z2))
 
         # refl_sim = f(sim(z1, z1))
         # between_sim = f(sim(z1, z2))

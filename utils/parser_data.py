@@ -14,7 +14,7 @@ def parser_data(data):
     parser.add_argument(
         "--data_dir", default=os.path.join(os.getcwd(), "data"), type=str
     )
-    parser.add_argument("--runs", default=5, type=int)
+    parser.add_argument("--runs", default=3, type=int)
     parser.add_argument("--epochs", default=500, type=int)
     parser.add_argument("--cuda", default=0, choices=[-1, 0, 1, 2, 3], type=int)
     parser.add_argument("--train_prop", type=float, default=0.1)
@@ -85,7 +85,7 @@ def parser_data(data):
     parser.set_defaults(GPR=False)
     parser.set_defaults(LearnMask=False)
     parser.add_argument("--valid_prop", type=float, default=0.1)
-    parser.add_argument("--display_step", type=int, default=1)
+    parser.add_argument("--display_step", type=int, default=100)
     if data == "cora":
         parser.add_argument("--All_num_layers", default=1, type=int)
         parser.add_argument(
