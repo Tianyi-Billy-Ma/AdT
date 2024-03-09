@@ -432,7 +432,7 @@ def parser_data(data):
             "--Classifier_hidden", default=256, type=int
         )  # Decoder hidden units
         parser.add_argument("--wd", default=0.0, type=float)
-        parser.add_argument("--lr", default=0.001, type=float)ç
+        parser.add_argument("--lr", default=0.001, type=float)
         parser.add_argument("--method", default="AllDeepSets")
         parser.add_argument("--dname", default="twitter")
         # parser.add_argument("--batch", default=True)
