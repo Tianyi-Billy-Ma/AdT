@@ -13,8 +13,16 @@ from scipy.sparse import load_npz
 from torch_geometric.data import Data
 from torch_sparse import coalesce
 
+from .preprocessing import (
+    ExtractV2E,
+    Add_Self_Loops,
+    expand_edge_index,
+    norm_contruction,
+)
+
 # from randomperm_code import random_planetoid_splits
 from sklearn.feature_extraction.text import CountVectorizer
+
 
 def save_data_to_pickle(data, p2root="../data/", file_name=None):
     """
@@ -33,7 +41,6 @@ def save_data_to_pickle(data, p2root="../data/", file_name=None):
     with open(p2he_StarExpan, "bw") as f:
         pickle.dump(data, f)
     return p2he_StarExpan
-
 
 
 def load_LE_dataset(path=None, dataset="ModelNet40", train_percent=0.025):
@@ -468,7 +475,7 @@ def load_twitter_data(path):
     X = np.loadtxt(embed_file_path)
     X = X[:, 1:]
     # # load labels
-    label_file_path = osp.join(path, "label_role.txt")
+    label_file_path = osp.join(path, "label.txt")
     Y = np.loadtxt(label_file_path).astype(np.int32)
     Y = Y.argmax(1)
     # label_edge_file_path = osp.join(path, "label_edge.txt")
@@ -685,3 +692,77 @@ class dataset_Hypergraph(InMemoryDataset):
 
     def __repr__(self):
         return "{}()".format(self.name)
+
+
+def load_data(args):
+    ### Load and preprocess data ###
+    existing_dataset = [
+        "20newsW100",
+        "ModelNet40",
+        "zoo",
+        "NTU2012",
+        "Mushroom",
+        "coauthor_cora",
+        "coauthor_dblp",
+        "yelp",
+        "amazon-reviews",
+        "walmart-trips",
+        "house-committees",
+        "walmart-trips-100",
+        "house-committees-100",
+        "cora",
+        "citeseer",
+        "pubmed",
+        "twitter",
+    ]
+
+    synthetic_list = [
+        "amazon-reviews",
+        "walmart-trips",
+        "house-committees",
+        "walmart-trips-100",
+        "house-committees-100",
+    ]
+    if args.dname in existing_dataset:
+        dname = args.dname
+        f_noise = args.feature_noise
+        p2raw = osp.join(args.data_dir, "raw_data")
+        if (f_noise is not None) and dname in synthetic_list:
+            dataset = dataset_Hypergraph(name=dname, feature_noise=f_noise, p2raw=p2raw)
+        else:
+            if dname in ["cora", "citeseer", "pubmed"]:
+                p2raw = osp.join(p2raw, "cocitation")
+            elif dname in ["coauthor_cora", "coauthor_dblp"]:
+                p2raw = osp.join(p2raw, "coauthorship")
+            elif dname in ["yelp"]:
+                p2raw = osp.join(p2raw, "yelp")
+            elif dname in ["twitter"]:
+                p2raw = osp.join(p2raw, "twitter")
+            dataset = dataset_Hypergraph(
+                name=dname,
+                root=osp.join(args.data_dir, "pyg_data", "hypergraph_dataset_updated"),
+                p2raw=p2raw,
+            )
+    data = dataset.data
+    args.num_features = dataset.num_features
+    args.num_classes = dataset.num_classes
+    if args.dname in [
+        "yelp",
+        "walmart-trips",
+        "house-committees",
+        "walmart-trips-100",
+        "house-committees-100",
+    ]:
+        args.num_classes = len(data.y.unique())
+        data.y = data.y - data.y.min()
+    data.n_x = torch.tensor([data.x.shape[0]])
+    data.num_hyperedges = torch.tensor([data.num_hyperedges])
+
+    data = ExtractV2E(data)
+    if args.add_self_loop:
+        data = Add_Self_Loops(data)
+    if args.exclude_self:
+        data = expand_edge_index(data)
+    data = norm_contruction(data, option=args.normtype)
+
+    return data

@@ -1,4 +1,5 @@
 import os, os.path as osp
+import sys
 import torch
 import time
 import numpy as np
@@ -6,108 +7,25 @@ import copy
 from tqdm import tqdm
 from collections import defaultdict
 import torch.nn as nn, torch.nn.functional as F
-from utils import (
-    parser_data,
+
+from utils.parser_data import parser_data
+from utils.augmentation import aug
+from utils.dataLoader import load_data
+
+from utils.models import SetGNN
+from utils.helper import (
     fix_seed,
-    dataset_Hypergraph,
-    ExtractV2E,
-    Add_Self_Loops,
-    expand_edge_index,
-    norm_contruction,
     rand_train_test_idx,
-    SetGNN,
     count_parameters,
     Logger,
-    eval_acc,
-    evaluate,
-    evaluate_finetune,
-    aug,
-    create_hypersubgraph,
 )
-
-# from utils.dataLoader import dataset_Hypergraph
-# from utils.preprocessing import ExtractV2E, Add_Self_Loops, expand_edge_index, norm_contruction
-
+from utils.evaluation import evaluate, evaluate_finetune, eval_acc
 
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:128"
 
 
-def load_data(args):
-    ### Load and preprocess data ###
-    existing_dataset = [
-        "20newsW100",
-        "ModelNet40",
-        "zoo",
-        "NTU2012",
-        "Mushroom",
-        "coauthor_cora",
-        "coauthor_dblp",
-        "yelp",
-        "amazon-reviews",
-        "walmart-trips",
-        "house-committees",
-        "walmart-trips-100",
-        "house-committees-100",
-        "cora",
-        "citeseer",
-        "pubmed",
-        "twitter",
-    ]
-
-    synthetic_list = [
-        "amazon-reviews",
-        "walmart-trips",
-        "house-committees",
-        "walmart-trips-100",
-        "house-committees-100",
-    ]
-    if args.dname in existing_dataset:
-        dname = args.dname
-        f_noise = args.feature_noise
-        p2raw = osp.join(args.data_dir, "AllSet_all_raw_data")
-        if (f_noise is not None) and dname in synthetic_list:
-            dataset = dataset_Hypergraph(name=dname, feature_noise=f_noise, p2raw=p2raw)
-        else:
-            if dname in ["cora", "citeseer", "pubmed"]:
-                p2raw = osp.join(p2raw, "cocitation")
-            elif dname in ["coauthor_cora", "coauthor_dblp"]:
-                p2raw = osp.join(p2raw, "coauthorship")
-            elif dname in ["yelp"]:
-                p2raw = osp.join(p2raw, "yelp")
-            elif dname in ["twitter"]:
-                p2raw = osp.join(p2raw, "twitter")
-            dataset = dataset_Hypergraph(
-                name=dname,
-                root=osp.join(args.data_dir, "pyg_data", "hypergraph_dataset_updated"),
-                p2raw=p2raw,
-            )
-    data = dataset.data
-    args.num_features = dataset.num_features
-    args.num_classes = dataset.num_classes
-    if args.dname in [
-        "yelp",
-        "walmart-trips",
-        "house-committees",
-        "walmart-trips-100",
-        "house-committees-100",
-    ]:
-        args.num_classes = len(data.y.unique())
-        data.y = data.y - data.y.min()
-    data.n_x = torch.tensor([data.x.shape[0]])
-    data.num_hyperedges = torch.tensor([data.num_hyperedges])
-
-    data = ExtractV2E(data)
-    if args.add_self_loop:
-        data = Add_Self_Loops(data)
-    if args.exclude_self:
-        data = expand_edge_index(data)
-    data = norm_contruction(data, option=args.normtype)
-
-    return data
-
-
 def main(args):
-
+    start = time.time()
     # # Part 1: Load data
     data = load_data(args)
 
@@ -405,19 +323,15 @@ def main(args):
     avg_time, std_time = np.mean(runtime_list), np.std(runtime_list)
 
     best_val_acc, best_test_acc, test_f1 = logger.print_statistics()
-    res_root = "hyperparameter_tunning/attack/"
+    res_root = osp.join(args.root_dir, "result")
     if not osp.isdir(res_root):
         os.makedirs(res_root)
 
-    filename = f"{res_root}/{args.dname}_noise_{args.feature_noise}.csv"
+    filename = f"{res_root}/{args.dname}.csv"
     print(f"Saving results to {filename}")
     with open(filename, "a+") as write_obj:
-        if args.p_lr:
-            cur_line = f"attack_{args.attack}_{args.method}_{args.m_l}_{args.lr}_{args.wd}_{args.sub_size}_{args.heads}_aug_{args.aug}_ratio_{str(args.aug_ratio)}_t_{str(args.t)}_plr_{str(args.p_lr)}_pepoch_{str(args.p_epochs)}_player_{str(args.p_layer)}_phidden_{str(args.p_hidden)}_drop_{str(args.dropout)}_train_{str(args.train_prop)}"
-            if args.add_e:
-                cur_line += "_add_e"
-        else:
-            cur_line = f"attack_{args.attack}_{args.method}_{args.lr}_{args.wd}_{args.heads}_{str(args.dropout)}_train_{str(args.train_prop)}"
+
+        cur_line = f"{args.method}_{args.lr}_{args.wd}_{args.heads}_{str(args.dropout)}"
         cur_line += f",{args.aug1,args.aug2}"
         cur_line += f",{best_val_acc.mean():.3f} ± {best_val_acc.std():.3f}"
         cur_line += f",{best_test_acc.mean():.3f} ± {best_test_acc.std():.3f}"
@@ -427,7 +341,7 @@ def main(args):
         cur_line += f"\n"
         write_obj.write(cur_line)
 
-    all_args_file = f"{res_root}/all_args_{args.dname}_attack_{args.attack}_noise_{args.feature_noise}.csv"
+    all_args_file = f"{res_root}/all_args_{args.dname}.csv"
     with open(all_args_file, "a+") as f:
         f.write(str(args))
         f.write("\n")
@@ -437,26 +351,15 @@ def main(args):
 
 
 if __name__ == "__main__":
-    start = time.time()
-    # data = "walmart-trips-100"
-    data = "twitter"
-    # data = "cora"
-    args = parser_data(data)
+    args = parser_data()
     fix_seed(args.seed)
-    for All_num_layers in [1, 2]:
-        for heads in [1, 4, 8]:
-            for MLP_hidden in [128, 256, 512]:
-                for Classifier_hidden in [128, 256, 512]:
-                    for wd in [0.0, 0.001]:
-                        for lr in [0.01, 0.001, 0.1]:
-                            args.All_num_layers = All_num_layers
-                            args.heads = heads
-                            args.MLP_hidden = MLP_hidden
-                            args.Classifier_hidden = Classifier_hidden
-                            args.wd = wd
-                            args.lr = lr
-                            try:
-                                main(args)
-                            except:
-                                print("Error")
-                                continue
+    if args.dname.startswith("twitter") or args.dname.startswith("walmart"):
+        use_cpu = input(
+            "Some steps may takes large GPU memory, do you want to move part of training to CPU? (y/n)\n"
+        )
+        if use_cpu.lower() == "y":
+            print("Move some steps of training to CPU!")
+            args.use_cpu = True
+        else:
+            args.use_cpu = False
+    main(args)

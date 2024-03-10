@@ -276,7 +276,6 @@ def drop_nodes(data, aug_ratio):
     data.totedges = torch.tensor(sub_nodes.size(0) - sub_size)
     data.num_ori_edge = sub_edge_index.shape[1] - sub_size
 
-    # return data, set(sub_nodes[:sub_size].cpu().numpy()),set(sub_edge_index_orig[1][torch.where((sub_edge_index_orig[1]<node_size+hyperedge_size) & (sub_edge_index_orig[1]>node_size-1))[0]].cpu().numpy())
     return (
         data,
         sorted(set(sub_nodes[:sub_size].cpu().numpy())),
@@ -302,8 +301,6 @@ def subgraph_aug(data, aug_ratio, start):
     edge_index = data.edge_index
 
     row, col = edge_index
-    # torch.cat([row,col])
-    # adj = SparseTensor(row=torch.cat([row,col]), col=torch.cat([col,row]), sparse_sizes=(node_num+he_num, he_num+node_num))
     adj = SparseTensor(
         row=torch.cat([row, col]),
         col=torch.cat([col, row]),
@@ -313,19 +310,9 @@ def subgraph_aug(data, aug_ratio, start):
     node_idx = adj.random_walk(start.flatten(), n_walkLen).view(-1)
     sub_nodes = node_idx.unique()
     sub_nodes.sort()
-    # sub_edge_index, _ = subgraph(sub_nodes, edge_index, relabel_nodes=True)
-    # sub_edge_index, _, hyperedge_idx = subgraph(sub_nodes, edge_index, relabel_nodes=False, return_edge_mask=True)
-    # data.edge_index = sub_edge_index
-    # cidx = torch.where(sub_nodes >= node_num)[
-    #     0].min()
-    # data.x = data.x[sub_nodes[:cidx]]
 
-    ###
     node_size = int(data.n_x[0].item())
     hyperedge_size = int(data.num_hyperedges)
-
-    # sub_nodes, sub_edge_index, mapping, _ = k_hop_subgraph(sample_nodes, 1, edge_index, relabel_nodes=False,
-    #                                                        flow='target_to_source')
     sub_edge_index, _, hyperedge_idx = subgraph(
         sub_nodes, edge_index, relabel_nodes=False, return_edge_mask=True
     )
@@ -347,12 +334,6 @@ def subgraph_aug(data, aug_ratio, start):
     data.norm = 0
     data.totedges = torch.tensor(sub_nodes.size(0) - node_keep_idx.size(0))
     data.num_ori_edge = sub_edge_index.shape[1] - node_keep_idx.size(0)
-
-    # return data, set(sub_nodes[:sub_size].cpu().numpy()), set(sub_edge_index_orig[1][torch.where(
-    #     (sub_edge_index_orig[1] < node_size + hyperedge_size) & (sub_edge_index_orig[1] > node_size - 1))[
-    #     0]].cpu().numpy())
-
-    # return data, set(node_keep_idx.cpu().numpy()),set(sub_edge_index_orig[1][torch.where((sub_edge_index_orig[1] < node_size + hyperedge_size) & (sub_edge_index_orig[1] > node_size - 1))[0]].cpu().numpy())
     return (
         data,
         sorted(set(node_keep_idx.cpu().numpy().tolist())),
@@ -369,31 +350,6 @@ def subgraph_aug(data, aug_ratio, start):
             )
         ),
     )
-
-
-# def subgraph_aug(data, aug_ratio, start):
-#     n_walkLen = 16
-#     node_num, _ = data.x.size()
-#     he_num = data.totedges.item()
-#     edge_index = data.edge_index
-#
-#     row, col = edge_index
-#     # torch.cat([row,col])
-#     # adj = SparseTensor(row=torch.cat([row,col]), col=torch.cat([col,row]), sparse_sizes=(node_num+he_num, he_num+node_num))
-#     adj = SparseTensor(row=torch.cat([row, col]), col=torch.cat([col, row]),
-#                        sparse_sizes=(node_num + he_num, he_num + node_num))
-#
-#     node_idx = adj.random_walk(start.flatten(), n_walkLen).view(-1)
-#     sub_nodes = node_idx.unique()
-#     sub_nodes.sort()
-#     # sub_edge_index, _ = subgraph(sub_nodes, edge_index, relabel_nodes=True)
-#     sub_edge_index, _, hyperedge_idx = subgraph(sub_nodes, edge_index, relabel_nodes=True, return_edge_mask=True)
-#     data.edge_index = sub_edge_index
-#     cidx = torch.where(sub_nodes >= node_num)[
-#         0].min()
-#     data.x = data.x[sub_nodes[:cidx]]
-#
-#     return data, set(sub_nodes[:cidx].cpu().numpy()),set(torch.where((edge_index[1][hyperedge_idx]> node_num-1)&(edge_index[1][hyperedge_idx]<node_num+data.num_hyperedges))[0].cpu().numpy())
 
 
 def aug(data, aug_type, args, start=None):

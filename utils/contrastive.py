@@ -82,34 +82,6 @@ def com_semi_loss(z1: torch.Tensor, z2: torch.Tensor, T, com_nodes1, com_nodes2)
     )
 
 
-class SimCLRTau:
-    def __init__(
-        self,
-        args,
-    ):
-        super(SimCLRTau).__init__()
-        self.proj1 = nn.Linear(args.hidden, args.proj)
-        self.proj2 = nn.Linear(args.hidden, args.proj)
-        self.tau = nn.Linear(args.proj, 1)
-
-    def forward(self, z1: torch.Tensor, z2: torch.Tensor, T, com_nodes1, com_nodes2):
-        z1 = self.proj1(z1)
-        z2 = self.proj2(z2)
-
-        f = lambda x: torch.exp(x / self.tau)
-        refl_sim = f(sim(z1, z1))
-        between_sim = f(sim(z1, z2))
-
-        return -torch.log(
-            between_sim[com_nodes1, com_nodes2]
-            / (
-                refl_sim.sum(1)[com_nodes1]
-                + between_sim.sum(1)[com_nodes1]
-                - refl_sim.diag()[com_nodes1]
-            )
-        )
-
-
 def contrastive_loss_node(x1, x2, args, com_nodes=None):
     T = args.t
     # if args.dname in ["yelp", "coauthor_dblp", "walmart-trips-100"]:

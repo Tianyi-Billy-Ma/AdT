@@ -32,13 +32,9 @@ class SimCLRTau(nn.Module):
 
         self.fc1 = nn.Linear(pre_hidden, 200)
         self.fc2 = nn.Linear(200, args.MLP_hidden)
-        self.tau1 = args.t
-        # self.tau2 = 0.1
-        self.low = 0.1
+        self.tau = args.t
+        self.low = args.tau_lowerbound
         self.pre_grad = 0.0
-        # self.tau = nn.Linear(args.MLP_hidden, 1)
-        # nn.init.xavier_uniform_(self.tau)
-        # self.reset_parameters()
 
     def project(self, z):
         z = F.elu(self.fc1(z))
@@ -68,13 +64,17 @@ class SimCLRTau(nn.Module):
         z1 = self.project(z1)
         z2 = self.project(z2)
 
-        self.tau1 = self.momentum(self.tau1, z1)
-        #  self.tau1 = 1
+        # self.tau = self.momentum(self.tau, z1)
+        self.tau = 1.0
 
-        f = lambda x: torch.exp(x / self.tau1)
+        f = lambda x: torch.exp(x / self.tau)
 
-        refl_sim = f(sim(z1, z1))
-        between_sim = f(sim(z1, z2))
+        if self.args.use_cpu:
+            refl_sim = f(sim(z1, z1).cpu())
+            between_sim = f(sim(z1, z2).cpu())
+        else:
+            refl_sim = f(sim(z1, z1))
+            between_sim = f(sim(z1, z2))
 
         # refl_sim = f(sim(z1, z1))
         # between_sim = f(sim(z1, z2))
@@ -95,7 +95,8 @@ class SimCLRTau(nn.Module):
             neg_score_1 = torch.sum(neg_score_1) - torch.sum(neg_score_1.diag())
             neg_score_2 = torch.sum(F.softplus(-between_sim) + between_sim - np.log(2))
             neg_score = (neg_score_1 + neg_score_2) / (N * (2 * N - 1))
-            return neg_score - pos_score
+            res = neg_score - pos_score
+            return res.cuda()
 
     def whole_batched_semi_loss(z1: torch.Tensor, z2: torch.Tensor, batch_size: int, T):
         # Space complexity: O(BN) (semi_loss: O(N^2))
@@ -888,7 +889,7 @@ class PMA(MessagePassing):
         :meth:`__init__` by the :obj:`aggr` argument.
         """
         #         ipdb.set_trace()
-        if aggr is None:
+        if aggr == None:
             aggr = "add"
             return scatter(inputs, index, dim=self.node_dim, reduce=aggr)
             raise ValueError("aggr was not passed!")
@@ -977,7 +978,7 @@ class MLP(nn.Module):
         for lin in self.lins:
             lin.reset_parameters()
         for normalization in self.normalizations:
-            if not (normalization.__class__.__name__ is "Identity"):
+            if not (normalization.__class__.__name__ == "Identity"):
                 normalization.reset_parameters()
 
     def forward(self, x):
@@ -1073,7 +1074,7 @@ class HalfNLHconv(MessagePassing):
 
     def message(self, x_j, norm, aug_weight):
         # return norm.view(-1, 1) * x_j
-        out = x_j if aug_weight is None else x_j * aug_weight.view(-1, 1)
+        out = x_j if aug_weight == None else x_j * aug_weight.view(-1, 1)
         return out
 
     def aggregate(self, inputs, index, dim_size=None, aggr=None):
@@ -1088,7 +1089,7 @@ class HalfNLHconv(MessagePassing):
         :meth:`__init__` by the :obj:`aggr` argument.
         """
         #       ipdb.set_trace()
-        if aggr is None:
+        if aggr == None:
             aggr = "add"
             return scatter(inputs, index, dim=self.node_dim, reduce=aggr)
             raise ValueError("aggr was not passed!")
