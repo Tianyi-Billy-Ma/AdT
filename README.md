@@ -26,7 +26,7 @@ To reproduce our experiments, simply run:
 python main.py --dname dataset
 ```
 
-For relatively large datasets that take large GPU memory for training, i.e., Twitter-HyDrug and Walmart-strips, we also provides an option to move part of training to CPUs. Our program will auto detect the dataset, and ask whether move parts of training to CPUs.
+For relatively large datasets that take large GPU memory for training, i.e., Twitter-HyDrug and Walmart-trips, we also provides an option to move part of training to CPUs. Our program will auto detect the dataset, and ask whether move parts of training to CPUs.
 ```
 >> python main.py --dname Twitter-HyDrug
 ## Some steps may take large GPU memory, do you want to move parts of training to CPU? (y/n)
