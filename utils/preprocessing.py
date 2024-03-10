@@ -3,7 +3,7 @@ from itertools import combinations
 import torch
 from torch_scatter import scatter_add
 from torch_geometric.nn.conv.gcn_conv import gcn_norm
-import random
+import numpy as np
 
 
 def expand_edge_index(data, edge_th=0):

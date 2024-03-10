@@ -8,6 +8,36 @@ from torch_geometric.utils import (
     degree,
 )
 from torch_sparse import SparseTensor
+from torch_geometric.data import Data
+
+
+def create_hypersubgraph(data, args):
+    sub_size = args.sub_size
+    node_size = int(data.n_x[0].item())
+    # hyperedge_size = int(data.num_hyperedges[0].item())
+    hyperedge_size = int(data.num_hyperedges)
+    sample_nodes = np.random.permutation(node_size)[:sub_size]
+    sample_nodes = list(np.sort(sample_nodes))
+    edge_index = data.edge_index
+    device = edge_index.device
+    sub_nodes, sub_edge_index, mapping, _ = k_hop_subgraph(
+        sample_nodes, 1, edge_index, relabel_nodes=False, flow="target_to_source"
+    )
+    sub_nodes, sorted_idx = torch.sort(sub_nodes)
+    # relabel
+    node_idx = torch.zeros(
+        2 * node_size + hyperedge_size, dtype=torch.long, device=device
+    )
+    node_idx[sub_nodes] = torch.arange(sub_nodes.size(0), device=device)
+    sub_edge_index = node_idx[sub_edge_index]
+    x = data.x[sample_nodes]
+    data_sub = Data(x=x, edge_index=sub_edge_index)
+    data_sub.n_x = torch.tensor([sub_size])
+    data_sub.num_hyperedges = torch.tensor([sub_nodes.size(0) - 2 * sub_size])
+    data_sub.norm = 0
+    data_sub.totedges = torch.tensor(sub_nodes.size(0) - sub_size)
+    data_sub.num_ori_edge = sub_edge_index.shape[1] - sub_size
+    return data_sub
 
 
 def permute_edges(data, aug_ratio, permute_self_edge, args):
@@ -299,6 +329,8 @@ def subgraph_aug(data, aug_ratio, start):
     node_num, _ = data.x.size()
     he_num = data.totedges.item()
     edge_index = data.edge_index
+
+    device = edge_index.device
 
     row, col = edge_index
     adj = SparseTensor(
