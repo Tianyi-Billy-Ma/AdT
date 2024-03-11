@@ -14,7 +14,6 @@ from torch_geometric.data import Data
 def create_hypersubgraph(data, args):
     sub_size = args.sub_size
     node_size = int(data.n_x[0].item())
-    # hyperedge_size = int(data.num_hyperedges[0].item())
     hyperedge_size = int(data.num_hyperedges)
     sample_nodes = np.random.permutation(node_size)[:sub_size]
     sample_nodes = list(np.sort(sample_nodes))
@@ -51,7 +50,6 @@ def permute_edges(data, aug_ratio, permute_self_edge, args):
     if args.add_e:
         idx_add_1 = np.random.choice(node_num, permute_num)
         idx_add_2 = np.random.choice(int(data.num_hyperedges), permute_num)
-        # idx_add_2 = np.random.choice(int(data.num_hyperedges[0].item()), permute_num)
         idx_add = np.stack((idx_add_1, idx_add_2), axis=0)
     edge2remove_index = np.where(edge_index[1] < data.num_hyperedges[0].item())[0]
     edge2keep_index = np.where(edge_index[1] >= data.num_hyperedges[0].item())[0]
@@ -81,10 +79,8 @@ def permute_edges(data, aug_ratio, permute_self_edge, args):
             axis=1,
         )
     else:
-        # edge_index = edge_after_remove
         edge_index = np.concatenate((edge_after_remove1, edge_after_remove2), axis=1)
     data.edge_index = torch.tensor(edge_index)
-    # return data,[i for i in range(node_num)]
     return (
         data,
         sorted(set([i for i in range(data.x.shape[0])])),
@@ -106,7 +102,6 @@ def permute_edges(data, aug_ratio, permute_self_edge, args):
 def permute_hyperedges(data, aug_ratio):
     node_num, _ = data.x.size()
     _, edge_num = data.edge_index.size()
-    # hyperedge_num = int(data.num_hyperedges[0].item())
     hyperedge_num = int(data.num_hyperedges)
     permute_num = int(hyperedge_num * aug_ratio)
     index = defaultdict(list)
@@ -118,7 +113,6 @@ def permute_hyperedges(data, aug_ratio):
     edge_remove_index_all = [
         i for i, he in enumerate(edge_index[1]) if he in edge_remove_index_dict
     ]
-    # print(len(edge_remove_index_all), edge_num, len(edge_remove_index), aug_ratio, hyperedge_num)
     edge_keep_index = list(set(list(range(edge_num))) - set(edge_remove_index_all))
     edge_after_remove = edge_index[:, edge_keep_index]
     edge_index = edge_after_remove
@@ -146,7 +140,6 @@ def permute_hyperedges(data, aug_ratio):
 def adapt(data, aug_ratio, aug):
     node_num, _ = data.x.size()
     _, edge_num = data.edge_index.size()
-    # hyperedge_num = int(data.num_hyperedges[0].item())
     hyperedge_num = int(data.num_hyperedges)
     permute_num = int(hyperedge_num * aug_ratio)
     index = defaultdict(list)
@@ -211,16 +204,13 @@ def drop_feature_weighted(x, w, p: float, threshold: float = 0.7):
 def degree_drop_weights(edge_index, h):
     edge_index_ = edge_index
     deg = degree(edge_index_[1])[:h]
-    # deg_col = deg[edge_index[1]].to(torch.float32)
     deg_col = deg
     s_col = torch.log(deg_col)
-    # weights = (s_col.max() - s_col+1e-9) / (s_col.max() - s_col.mean()+1e-9)
     weights = (s_col - s_col.min() + 1e-9) / (s_col.mean() - s_col.min() + 1e-9)
     return weights
 
 
 def feature_drop_weights(x, node_c):
-    # x = x.to(torch.bool).to(torch.float32)
     x = torch.abs(x).to(torch.float32)
     # 100 x 2012 mat 2012-> 100
     w = x.t() @ node_c

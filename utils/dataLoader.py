@@ -50,9 +50,7 @@ def load_LE_dataset(path=None, dataset="ModelNet40", train_percent=0.025):
     file_name = f"{dataset}.content"
     p2idx_features_labels = osp.join(path, dataset, file_name)
     idx_features_labels = np.genfromtxt(p2idx_features_labels, dtype=np.dtype(str))
-    # features = np.array(idx_features_labels[:, 1:-1])
     features = sp.csr_matrix(idx_features_labels[:, 1:-1], dtype=np.float32)
-    #     labels = encode_onehot(idx_features_labels[:, -1])
     labels = torch.LongTensor(idx_features_labels[:, -1].astype(float))
 
     print("load features")

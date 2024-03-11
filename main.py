@@ -79,7 +79,6 @@ def main(args):
         he_index[he].append(i)
     runtime_list = []
     for run in tqdm(range(args.runs)):
-        # for run in range(args.runs):
         start_time = time.time()
         split_idx = split_idx_lst[run]
         train_idx = split_idx["train"].to(device)
@@ -203,7 +202,6 @@ def main(args):
                     data_aug_pgd2, data2_node2edge_sample, data2_edgeidx, device
                 )
 
-                # if args.aug1 in ['drop','subgraph'] or args.aug2 in ['drop','subgraph']:
                 com_sample = list(set(nodes1) & set(nodes2))
                 dict_nodes1, dict_nodes2 = {
                     value: i for i, value in enumerate(nodes1)
@@ -211,7 +209,7 @@ def main(args):
                 com_sample1, com_sample2 = [
                     dict_nodes1[value] for value in com_sample
                 ], [dict_nodes2[value] for value in com_sample]
-                loss_cl = model.get_loss(out1, out2, args.t, [com_sample1, com_sample2])
+                loss_cl = model.get_loss(out1, out2, [com_sample1, com_sample2])
 
                 com_edge = list(
                     set(data1_edgeidx.tolist()) & set(data2_edgeidx.tolist())
@@ -225,7 +223,7 @@ def main(args):
                     dict_edge2[value] for value in com_edge
                 ]
                 loss_cl_gl = model.get_loss(
-                    edge1, edge2, args.t, [com_edge1, com_edge2]
+                    edge1, edge2, [com_edge1, com_edge2]
                 )
 
             else:
@@ -242,7 +240,6 @@ def main(args):
             loss.backward()
             optimizer.step()
 
-            time2 = time.time()
             if args.linear:
                 result = evaluate_finetune(model, data, split_idx, eval_func)
             else:
@@ -299,18 +296,18 @@ def main(args):
         f.write("\n")
     end = time.time()
     mins = (end - start) / 60
-    # print("The running time is {}".format(mins))
+    print("The running time is {}".format(mins))
 
 
 if __name__ == "__main__":
     args = parser_data()
     fix_seed(args.seed)
-    if args.dname.startswith("twitter") or args.dname.startswith("walmart"):
+    if args.dname.startswith("twitter-HyDrug"):
         use_cpu = input(
-            "Some steps may takes large GPU memory, do you want to move part of training to CPU? (y/n)\n"
+            "Due to the limited GPU memory, do you want to move some calculations to CPU? (y/n)\n"
         )
         if use_cpu.lower() == "y":
-            print("Move some steps of training to CPU!")
+            print("Move some calculations to CPU!")
             args.use_cpu = True
         else:
             args.use_cpu = False

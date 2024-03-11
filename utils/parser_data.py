@@ -10,7 +10,7 @@ def parser_data():
 
     pre_parser = argparse.ArgumentParser()
 
-    pre_parser.add_argument("--dname", default="twitter", type=str)
+    pre_parser.add_argument("--dname", default="cora", type=str)
     pre_args, unknown = pre_parser.parse_known_args()
     data = pre_args.dname
 
@@ -61,7 +61,7 @@ def parser_data():
     parser.add_argument("--PMA", action="store_true")
 
     parser.add_argument("--output_heads", default=1, type=int)  # Placeholder
-    parser.add_argument("--p_hidden", type=int, default=-1)
+    parser.add_argument("--p_hidden", type=int, default=128)
     parser.add_argument("--p_layer", type=int, default=-1)
     parser.add_argument(
         "--aug",
@@ -426,7 +426,7 @@ def parser_data():
         parser.add_argument("--node_batch_size", default=20000)
         parser.add_argument("--tau_lowerbound", default=0.1, type=float)
         parser.add_argument("--m_l", type=float, default=1)
-    elif data == "twitter":
+    elif data == "twitter-HyDrug":
         parser.add_argument("--All_num_layers", default=1, type=int)
         parser.add_argument(
             "--MLP_num_layers", default=2, type=int
@@ -445,7 +445,7 @@ def parser_data():
         parser.add_argument("--wd", default=0.0, type=float)
         parser.add_argument("--lr", default=0.001, type=float)
         parser.add_argument("--method", default="AllDeepSets")
-        parser.add_argument("--dname", default="twitter")
+        parser.add_argument("--dname", default="twitter-HyDrug")
         # parser.add_argument("--batch", default=True)
         parser.add_argument("--batch_size", default=128)
         parser.add_argument("--tau_lowerbound", default=0.2, type=float)

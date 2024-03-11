@@ -15,15 +15,10 @@ def sim(z1: torch.Tensor, z2: torch.Tensor):
 class SimCLRTau(nn.Module):
     def __init__(self, args):
         super(SimCLRTau, self).__init__()
-        if args.p_hidden > 0:
-            pre_hidden = args.p_hidden
-        else:
-            pre_hidden = args.Classifier_hidden
 
-        self.batch_size = args.batch_size
         self.args = args
-
-        self.fc1 = nn.Linear(pre_hidden, 200)
+        self.batch_size = args.batch_size
+        self.fc1 = nn.Linear(args.p_hidden, 200)
         self.fc2 = nn.Linear(200, args.MLP_hidden)
         self.tau = args.t
         self.low = args.tau_lowerbound
@@ -33,30 +28,30 @@ class SimCLRTau(nn.Module):
         z = F.elu(self.fc1(z))
         return self.fc2(z)
 
-    def uniform_loss(self, z: torch.Tensor, t: int = 2):
+    def uni_loss(self, z, t=2):
         return torch.pdist(z, p=2).pow(2).mul(-t).exp().mean().log()
 
-    def momentum(
+    def momentum_update(
         self,
-        x_start: float,
-        z: torch.Tensor,
-        step: float = 0.001,
-        discount: float = 0.7,
+        x_start,
+        z,
+        eta= 0.001,
+        rho= 0.7,
     ):
-        if x_start <= self.low:
+        if x_start < self.low:
             return x_start
         x = x_start
-        grad = -self.uniform_loss(z).item()
-        self.pre_grad = self.pre_grad * discount + 1 / grad
-        x -= self.pre_grad * step
+        grad = -self.uni_loss(z).item()
+        self.pre_grad = self.pre_grad * rho + 1 / grad
+        x -= self.pre_grad * eta
 
         return x
 
-    def forward(self, z1: torch.Tensor, z2: torch.Tensor, T, com_nodes1, com_nodes2):
+    def forward(self, z1, z2, com_nodes1, com_nodes2):
         z1 = self.project(z1)
         z2 = self.project(z2)
 
-        self.tau = self.momentum(self.tau, z1)
+        self.tau = self.momentum_update(self.tau, z1)
 
         f = lambda x: torch.exp(x / self.tau)
 
@@ -67,8 +62,6 @@ class SimCLRTau(nn.Module):
             refl_sim = f(sim(z1, z1))
             between_sim = f(sim(z1, z2))
 
-        # refl_sim = f(sim(z1, z1))
-        # between_sim = f(sim(z1, z2))
 
         if self.args.cl_loss == "InfoNCE":
             return -torch.log(
@@ -121,6 +114,7 @@ class SimCLRTau(nn.Module):
         f = lambda x: torch.exp(x / T)
         indices = np.arange(0, num_nodes)
         np.random.shuffle(indices)
+
         i = 0
         mask = indices[i * batch_size : (i + 1) * batch_size]
         refl_sim = f(sim(z1[mask], z1))  # [B, N]
@@ -303,16 +297,6 @@ class SetGNN(nn.Module):
                 Normalization=self.NormLayer,
                 InputNorm=False,
             )
-            # self.V2EConvsLast = HalfNLHconv(in_dim=pre_hidden,
-            #                                  hid_dim=pre_hidden,
-            #                                  out_dim=pre_hidden,
-            #                                  num_layers=args.MLP_num_layers,
-            #                                  dropout=self.dropout,
-            #                                  Normalization=self.NormLayer,
-            #                                  InputNorm=self.InputNorm,
-            #                                  heads=args.heads,
-            #                                  attention=args.PMA)
-
             self.linear = nn.Linear(args.MLP_hidden, args.num_classes)
             self.decoder = nn.Sequential(
                 nn.Linear(args.MLP_hidden, args.MLP_hidden),
@@ -368,25 +352,20 @@ class SetGNN(nn.Module):
             xs.append(F.relu(self.MLP(x)))
             for i, _ in enumerate(self.V2EConvs):
                 x = F.relu(self.V2EConvs[i](x, edge_index, norm, self.aggr))
-                #                 x = self.bnV2Es[i](x)
                 x = F.dropout(x, p=self.dropout, training=self.training)
                 x = self.E2VConvs[i](x, reversed_edge_index, norm, self.aggr)
                 x = F.relu(x)
                 xs.append(x)
-                #                 x = self.bnE2Vs[i](x)
                 x = F.dropout(x, p=self.dropout, training=self.training)
             x = torch.stack(xs, dim=-1)
             x = self.GPRweights(x).squeeze()
             x = self.classifier(x)
         else:
-            # if not self.sig:
             x = F.dropout(x, p=0.2, training=self.training)  # Input dropout
             for i, _ in enumerate(self.V2EConvs):
                 x = F.relu(self.V2EConvs[i](x, edge_index, norm, self.aggr))
-                #                 x = self.bnV2Es[i](x)
                 x = F.dropout(x, p=self.dropout, training=self.training)
                 x = F.relu(self.E2VConvs[i](x, reversed_edge_index, norm, self.aggr))
-                #                 x = self.bnE2Vs[i](x)
                 x = F.dropout(x, p=self.dropout, training=self.training)
             x = self.classifier(x)
         return x
@@ -469,12 +448,10 @@ class SetGNN(nn.Module):
             xs.append(F.relu(self.MLP(x)))
             for i, _ in enumerate(self.V2EConvs):
                 x = F.relu(self.V2EConvs[i](x, edge_index, norm, self.aggr))
-                #                 x = self.bnV2Es[i](x)
                 x = F.dropout(x, p=self.dropout, training=self.training)
                 x = self.E2VConvs[i](x, reversed_edge_index, norm, self.aggr)
                 x = F.relu(x)
                 xs.append(x)
-                #                 x = self.bnE2Vs[i](x)
                 x = F.dropout(x, p=self.dropout, training=self.training)
             x = torch.stack(xs, dim=-1)
             x = self.GPRweights(x).squeeze()
@@ -483,123 +460,13 @@ class SetGNN(nn.Module):
             x = F.dropout(x, p=0.2, training=self.training)  # Input dropout
             for i, _ in enumerate(self.V2EConvs):
                 x = F.relu(self.V2EConvs[i](x, edge_index, norm, self.aggr))
-                #                 x = self.bnV2Es[i](x)
                 x = F.dropout(x, p=self.dropout, training=self.training)
                 x = F.relu(self.E2VConvs[i](x, reversed_edge_index, norm, self.aggr))
-                #                 x = self.bnE2Vs[i](x)
                 x = F.dropout(x, p=self.dropout, training=self.training)
             x = self.linear(x)
 
         return x
 
-    def forward_embed(self, data):
-        """
-        The data should contain the follows
-        data.x: node features
-        data.edge_index: edge list (of size (2,|E|)) where data.edge_index[0] contains nodes and data.edge_index[1] contains hyperedges
-        !!! Note that self loop should be assigned to a new (hyper)edge id!!!
-        !!! Also note that the (hyper)edge id should start at 0 (akin to node id)
-        data.norm: The weight for edges in bipartite graphs, correspond to data.edge_index
-        !!! Note that we output final node representation. Loss should be defined outside.
-        """
-        #             The data should contain the follows
-        #             data.x: node features
-        #             data.V2Eedge_index:  edge list (of size (2,|E|)) where
-        #             data.V2Eedge_index[0] contains nodes and data.V2Eedge_index[1] contains hyperedges
-
-        x, edge_index, norm = data.x, data.edge_index, data.norm
-        if self.LearnMask:
-            norm = self.Importance * norm
-        cidx = edge_index[1].min()
-        edge_index[1] -= cidx  # make sure we do not waste memory
-        reversed_edge_index = torch.stack([edge_index[1], edge_index[0]], dim=0)
-
-        if self.GPR:
-            xs = []
-            xs.append(F.relu(self.MLP(x)))
-            for i, _ in enumerate(self.V2EConvs):
-                x = F.relu(self.V2EConvs[i](x, edge_index, norm, self.aggr))
-                #                 x = self.bnV2Es[i](x)
-                x = F.dropout(x, p=self.dropout, training=self.training)
-                x = self.E2VConvs[i](x, reversed_edge_index, norm, self.aggr)
-                x = F.relu(x)
-                xs.append(x)
-                #                 x = self.bnE2Vs[i](x)
-                x = F.dropout(x, p=self.dropout, training=self.training)
-            x = torch.stack(xs, dim=-1)
-            x = self.GPRweights(x).squeeze()
-            x = self.linear(x)
-        else:
-            x = F.dropout(x, p=0.2, training=self.training)  # Input dropout
-            for i, _ in enumerate(self.V2EConvs):
-                x = F.relu(self.V2EConvs[i](x, edge_index, norm, self.aggr))
-                #                 x = self.bnV2Es[i](x)
-                x = F.dropout(x, p=self.dropout, training=self.training)
-                x = F.relu(self.E2VConvs[i](x, reversed_edge_index, norm, self.aggr))
-                #                 x = self.bnE2Vs[i](x)
-                x = F.dropout(x, p=self.dropout, training=self.training)
-
-        return x
-
-    def forward_cl(self, data, aug_weight=None):
-        """
-        The data should contain the follows
-        data.x: node features
-        data.edge_index: edge list (of size (2,|E|)) where data.edge_index[0] contains nodes and data.edge_index[1] contains hyperedges
-        !!! Note that self loop should be assigned to a new (hyper)edge id!!!
-        !!! Also note that the (hyper)edge id should start at 0 (akin to node id)
-        data.norm: The weight for edges in bipartite graphs, correspond to data.edge_index
-        !!! Note that we output final node representation. Loss should be defined outside.
-        """
-        #             The data should contain the follows
-        #             data.x: node features
-        #             data.V2Eedge_index:  edge list (of size (2,|E|)) where
-        #             data.V2Eedge_index[0] contains nodes and data.V2Eedge_index[1] contains hyperedges
-
-        x, edge_index, norm = data.x, data.edge_index, data.norm
-        if self.LearnMask:
-            norm = self.Importance * norm
-        cidx = edge_index[1].min()
-        edge_index[1] -= cidx  # make sure we do not waste memory
-        reversed_edge_index = torch.stack([edge_index[1], edge_index[0]], dim=0)
-        if self.GPR:
-            xs = []
-            xs.append(F.relu(self.MLP(x)))
-            for i, _ in enumerate(self.V2EConvs):
-                x = F.relu(self.V2EConvs[i](x, edge_index, norm, self.aggr))
-                #                 x = self.bnV2Es[i](x)
-                x = F.dropout(x, p=self.dropout, training=self.training)
-                x = self.E2VConvs[i](x, reversed_edge_index, norm, self.aggr)
-                x = F.relu(x)
-                xs.append(x)
-                #                 x = self.bnE2Vs[i](x)
-                x = F.dropout(x, p=self.dropout, training=self.training)
-            x = torch.stack(xs, dim=-1)
-            x = self.GPRweights(x).squeeze()
-            x = self.proj_head(x)
-        else:
-            # if self.dropout:
-            if self.args.aug != "none":
-                x = F.dropout(x, p=0.2, training=self.training)  # Input dropout
-            for i, _ in enumerate(self.V2EConvs):
-                # print(edge_index[0].unique())
-                # print(x.shape)
-                x = F.relu(self.V2EConvs[i](x, edge_index, norm, self.aggr, aug_weight))
-                # print(x.shape)
-                #                 x = self.bnV2Es[i](x)
-                x = F.dropout(x, p=self.dropout, training=self.training)
-                x = F.relu(
-                    self.E2VConvs[i](
-                        x, reversed_edge_index, norm, self.aggr, aug_weight
-                    )
-                )
-                # print(x.shape)
-                #                 x = self.bnE2Vs[i](x)
-                x = F.dropout(x, p=self.dropout, training=self.training)
-            x = self.proj_head(x)
-        return x
-
-    # def forward_global_local(self, data, node2edge,device,aug_weight=None):
     def forward_global_local(
         self, data, node2edge, sample_edge_idx, device, aug_weight=None
     ):
@@ -620,96 +487,57 @@ class SetGNN(nn.Module):
         x, edge_index, norm = data.x, data.edge_index, data.norm
         if self.LearnMask:
             norm = self.Importance * norm
-        # cidx = edge_index[1].min()
-        cidx = x.shape[0]
-        # edge_index[1] -= cidx  # make sure we do not waste memory
         reversed_edge_index = torch.stack([edge_index[1], edge_index[0]], dim=0)
         if self.GPR:
             xs = []
             xs.append(F.relu(self.MLP(x)))
             for i, _ in enumerate(self.V2EConvs):
                 x = F.relu(self.V2EConvs[i](x, edge_index, norm, self.aggr))
-                #                 x = self.bnV2Es[i](x)
                 x = F.dropout(x, p=self.dropout, training=self.training)
                 x = self.E2VConvs[i](x, reversed_edge_index, norm, self.aggr)
                 x = F.relu(x)
                 xs.append(x)
-                #                 x = self.bnE2Vs[i](x)
                 x = F.dropout(x, p=self.dropout, training=self.training)
             x = torch.stack(xs, dim=-1)
             x = self.GPRweights(x).squeeze()
             x = self.proj_head(x)
         else:
-            # if self.dropout:
             if self.args.aug != "none":
                 x = F.dropout(x, p=0.2, training=self.training)  # Input dropout
             for i, _ in enumerate(self.V2EConvs):
-                # print(edge_index[0].unique())
-                # print(x.shape)
+
                 h1 = F.relu(
                     self.V2EConvs[i](x, edge_index, norm, self.aggr, aug_weight)
                 )
-                # print(x.shape)
-                #                 x = self.bnV2Es[i](x)
+
                 h1_d = F.dropout(h1, p=self.dropout, training=self.training)
                 h2 = F.relu(
                     self.E2VConvs[i](
                         h1_d, reversed_edge_index, norm, self.aggr, aug_weight
                     )
                 )
-                # print(x.shape)
-                #                 x = self.bnE2Vs[i](x)
+
                 h2_d = F.dropout(h2, p=self.dropout, training=self.training)
             x = self.proj_head(h2_d)
 
-            # h1 = h1[x.shape[0]:x.shape[0]+len(node2edge)]
             h1 = h1[sample_edge_idx]
-
-            def edge_embed(idx):
-                if self.args.edge == "sum":
-
-                    return sum(x[idx]).reshape(1, -1)
-
-                elif self.args.edge == "mean":
-                    return torch.mean(x[idx], dim=0).reshape(1, -1)
-                elif self.args.edge == "max":
-                    return torch.max(x[idx], dim=0)[0].reshape(1, -1)
-
-            # e_embed = list(map(lambda i: edge_embed(i), node2edge))
 
             e_embed = [
                 torch.sum(x[node2edge[i]], dim=0, keepdim=True)
                 for i in range(len(node2edge))
             ]
-
-            # e_embed = list(map(lambda i: sum(x[i]).reshape(1, -1), node2edge))
-            # e_embed = functorch.vmap(edge_embed)(node2edge)
-
-            # for e in torch.unique(edge_index[1]):
-            #     # idx_1 = torch.where(edge_index[1] == e)[0]
-            #     # idx_0 = torch.index_select(edge_index[0],-1,idx_1)
-            #     # embed = torch.index_select(x,0,idx_0)
-            #     # e_embed.append(sum(embed).reshape(1,-1))
-            #     idx_0 = torch.index_select(edge_index[0], -1, torch.where(edge_index[1] == e)[0])
-            #     e_embed.append(sum(torch.index_select(x, 0, idx_0)).reshape(1,-1))
-            # edge_embed = self.edge(torch.concat((torch.stack(e_embed).squeeze(), h1), dim=1)[sample_edge_idx])
-            # edge_embed = self.edge(torch.concat((torch.stack(e_embed).squeeze(), h1), dim=1))
-            # edge_embed = torch.concat((torch.stack(e_embed).squeeze(), h1), dim=1)
-            # edge_embed = h1
             edge_embed = self.edge(
-                torch.concat((h1, torch.stack(e_embed).squeeze()), dim=1)
+                torch.cat((h1, torch.stack(e_embed).squeeze()), dim=1)
             )
-        try:
 
-            return x, edge_embed
+        return x, edge_embed
 
-        except:
-            print("here")
 
-    def get_loss(self, h1, h2, T, com_nodes):
 
-        l1 = self.simclr_tau(h1, h2, T, com_nodes[0], com_nodes[1])
-        l2 = self.simclr_tau(h2, h1, T, com_nodes[1], com_nodes[0])
+    def get_loss(self, h1, h2, com_nodes):
+
+        l1 = self.simclr_tau(h1, h2,  com_nodes[0], com_nodes[1])
+        l2 = self.simclr_tau(h2, h1, com_nodes[1], com_nodes[0])
 
         ret = (l1 + l2) * 0.5
         ret = ret.mean()
