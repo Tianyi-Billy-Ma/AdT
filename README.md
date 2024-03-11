@@ -25,12 +25,14 @@ To reproduce our experiments, simply run:
 ```Python
 python main.py --dname dataset
 ```
-For instance, for cora hypergraph, please run:
+Available datasets are: [ "Twitter-HyDrug", "cora", "citeseer", "coauthor_cora", "Zoo", "Mushroom", "NTU2012"]
+
+For instance, for benchmark hypergraph dataset cora, please run:
 ```Python
 python main.py --dname cora
 ```
-
-For relatively large datasets that may take large GPU memory for some calculations, i.e., Twitter-HyDrug, we also provides an option to move part of calculations to CPUs. Our program will auto detect the dataset, and ask whether move parts of calculation to CPUs. If so, it may take longer for some calculation on CPU.
+As shown in Table I, Twitter-HyDrug has relatively large number of hyperedges, and requires large GPU memory for some calculation. We provides an option to move part of calculations to CPUs. Our program will auto detect the dataset, and ask whether move parts of caculation to CPUs. If so, it may take longer for some calculation on CPU. 
+For example:
 ```
 >> python main.py --dname Twitter-HyDrug
 ## "Due to the limited GPU memory, do you want to move some calculations to CPU? (y/n)"
@@ -38,28 +40,49 @@ For relatively large datasets that may take large GPU memory for some calculatio
 ## "Move some calculations to CPU!"
 ```
 
-## Twitter-HyDrug
-### Dataset
+## Dataset
+We adopt seven benchmark hypergraph datasets. The data statictics are listed in Table I. 
 
-We adopt the benchmark hypergraph dataset Twitter-HyDrug from [HyGCL-DC](https://github.com/GraphResearcher/HyGCL-DC). Twitter-HyDrug is a real-world hypergraph data that describes the drug trafficking communities on Twitter. 
-
-### LIST SOME STATISTICS OF THIS DATASET!!!
-### # of nodes, # of hyperedeges, # of hyperedge types, # of node types, # of each class, 
-
-
- 
 <div align="center">
 
-| Drug Type | Drugs (Key Words)                                   |
-|----------------|-----------------------------------------------------|
- | Cannabis       | Cannabis, and all cannabis-infused products         |
-| Opioid         | Oxycodone, Codeine, Morphine, Fentanyl, Hydrocodone |
-| Hallucinogen   | LSD, MDMA, Shroom, Mescaline, DMT, Ketamine         |
-| Stimulant      | Cocaine, Amphetamine, Metaphetamine                 | 
-| Depressant     | Xanax, Farmapram, Valium, Halcion, Ativan, Klonopin |
-| Others         | Drugs that are not listed above                     |
-<p> Table I: Type of drug communities and related drugs </p>
+| Dataset   | TWitter-HyDrug | Cora  | Citeseer | Cora-CA | Zoo | Mushroom | NTU2012 |
+|-----------|----------------|-------|----------|---------|-----|----------|---------|
+| # nodes       | 2,936          | 2,708 | 3,312    | 2,708   | 101 | 8,124    | 2012    |
+| # hyperedges  | 33,893         | 1,579 | 1,079    | 1,072   | 43  | 298      | 2,012   |
+| # features | 384            | 1,433 | 3,703    | 1,433   | 16  | 22       | 100     |
+| # classes   | 4              | 7     | 6        | 7       | 7   | 2        | 67      |
+| max $d(e)$ | 635  | 5    | 26       | 43      | 93  | 1808     | 5       |
+| min $d(e)$ | 1    | 2    | 2        | 2       | 1   | 1        | 5       |
+| avg $d(e)$ | 2.34 |3.03 | 3.20      | 4.28    | 39.93 | 136.31 | 5       |
+| max $d(v)$ | 3,340 | 145  | 88       | 23      | 17  | 5        | 19      |
+| min $d(v)$ | 0    | 0    | 0        | 0       | 17  | 5        | 1       |
+| avg $d(v)$ | 31.49 | 1.77 | 1.04     | 1.69    | 17  | 5        | 5       |
+
+Table I: Data Statistics of benchmark hypergraph datasets. $d(e)$ and $d(v)$ indicates the degree of hyperedges and nodes, respectively. 
 </div>
+
+
+## Twitter-HyDrug
+
+We adopt the benchmark hypergraph dataset Twitter-HyDrug from [HyGCL-DC](https://github.com/GraphResearcher/HyGCL-DC). Twitter-HyDrug is a real-world hypergraph data that describes the drug trafficking communities on Twitter. Unlike HyGCL-DC that targets at drug trafficking community detection task (a multi-label node classification), we aim to identify drug user roles in drug trafficking activities on social media. 
+To this end, we categorize node labels into four distinct roles: drug seller, drug buyer, drug user, and drug discussant, and each node is assigned to one and only one label. Consequently, we frame our problem as a multi-class node classification task. 
+
+ More detailed statistic of Twitter-HyDrug is listed in Table II.
+
+<div align="center">
+
+| Class Types    | # of Nodes | Hyperedge Types | # of Hyperedges |
+|----------------|------------|-----------------|-----------------|
+| Drug seller    | 455        | User-contain-emoji | 1,616          |
+| Drug buyer     | 319        | User-engage-conversation | 13,650   |
+| Drug user      | 1,650      | User-include-hashtag | 17,018       |
+| Drug discussant| 512        | User-follow-user | 1,609           |
+| Total Nodes    | 2,936      | Total Hyperedges | 33,893          |
+
+Table II: Detailed data statistic of Twitter-HyDrug
+</div>
+
+
 
 
 

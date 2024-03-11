@@ -302,7 +302,7 @@ def main(args):
 if __name__ == "__main__":
     args = parser_data()
     fix_seed(args.seed)
-    if args.dname.startswith("twitter-HyDrug"):
+    if args.dname.startswith("Twitter-HyDrug"):
         use_cpu = input(
             "Due to the limited GPU memory, do you want to move some calculations to CPU? (y/n)\n"
         )

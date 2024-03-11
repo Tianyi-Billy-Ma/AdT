@@ -131,32 +131,6 @@ def parser_data():
         parser.add_argument("--batch_size", default=1024)
         parser.add_argument("--tau_lowerbound", default=0.1, type=float)
         parser.add_argument("--m_l", type=float, default=1)
-    elif data == "pubmed":
-        parser.add_argument("--All_num_layers", default=1, type=int)
-        parser.add_argument(
-            "--MLP_num_layers", default=2, type=int
-        )  # How many layers of encoder
-        parser.add_argument("--feature_noise", default="0.0", type=str)
-        parser.add_argument("--heads", default=8, type=int)  # Placeholder
-        parser.add_argument(
-            "--Classifier_num_layers", default=1, type=int
-        )  # How many layers of decoder
-        parser.add_argument(
-            "--MLP_hidden", default=256, type=int
-        )  # Encoder hidden units
-        parser.add_argument(
-            "--Classifier_hidden", default=256, type=int
-        )  # Decoder hidden units
-        parser.add_argument("--wd", default=0.0, type=float)
-        parser.add_argument("--lr", default=0.001, type=float)
-        parser.add_argument("--method", default="AllDeepSets")
-        parser.add_argument("--dname", default="pubmed")
-        parser.add_argument("--node_batch_size", default=10240)
-        # parser.add_argument('--batch', default=False)
-        parser.add_argument("--batch", default=True)
-        parser.add_argument("--batch_size", default=1024)
-        parser.add_argument("--tau_lowerbound", default=0.1, type=float)
-        parser.add_argument("--m_l", type=float, default=0.1)
     elif data == "coauthor_cora":
         parser.add_argument("--All_num_layers", default=1, type=int)
         parser.add_argument(
@@ -181,32 +155,6 @@ def parser_data():
         parser.add_argument("--batch_size", default=1024)
         parser.add_argument("--tau_lowerbound", default=0.1, type=float)
         parser.add_argument("--m_l", type=float, default=1)
-    elif data == "coauthor_dblp":
-        parser.add_argument("--All_num_layers", default=1, type=int)
-        parser.add_argument(
-            "--MLP_num_layers", default=2, type=int
-        )  # How many layers of encoder
-        parser.add_argument("--feature_noise", default="0.0", type=str)
-        parser.add_argument("--heads", default=8, type=int)  # Placeholder
-        parser.add_argument(
-            "--Classifier_num_layers", default=1, type=int
-        )  # How many layers of decoder
-        parser.add_argument(
-            "--MLP_hidden", default=512, type=int
-        )  # Encoder hidden units
-        parser.add_argument(
-            "--Classifier_hidden", default=256, type=int
-        )  # Decoder hidden units
-        parser.add_argument("--wd", default=0.0, type=float)
-        parser.add_argument("--lr", default=0.001, type=float)
-        parser.add_argument("--method", default="AllDeepSets")
-        parser.add_argument("--dname", default="coauthor_dblp")
-        # parser.add_argument('--batch', default=False)
-        parser.add_argument("--batch", default=True)
-        parser.add_argument("--batch_size", default=1024)
-        parser.add_argument("--node_batch_size", default=10240)
-        parser.add_argument("--tau_lowerbound", default=0.1, type=float)
-        parser.add_argument("--m_l", type=float, default=1)
     elif data == "zoo":
         parser.add_argument("--All_num_layers", default=1, type=int)
         parser.add_argument(
@@ -227,30 +175,6 @@ def parser_data():
         parser.add_argument("--lr", default=0.01, type=float)
         parser.add_argument("--method", default="AllDeepSets")
         parser.add_argument("--dname", default="zoo")
-        parser.add_argument("--batch", default=False)
-        parser.add_argument("--batch_size", default=1024)
-        parser.add_argument("--tau_lowerbound", default=0.1, type=float)
-        parser.add_argument("--m_l", type=float, default=1)
-    elif data == "20newsW100":
-        parser.add_argument("--All_num_layers", default=1, type=int)
-        parser.add_argument(
-            "--MLP_num_layers", default=2, type=int
-        )  # How many layers of encoder
-        parser.add_argument("--feature_noise", default="0.0", type=str)
-        parser.add_argument("--heads", default=8, type=int)  # Placeholder
-        parser.add_argument(
-            "--Classifier_num_layers", default=1, type=int
-        )  # How many layers of decoder
-        parser.add_argument(
-            "--MLP_hidden", default=256, type=int
-        )  # Encoder hidden units
-        parser.add_argument(
-            "--Classifier_hidden", default=256, type=int
-        )  # Decoder hidden units
-        parser.add_argument("--wd", default=0.0, type=float)
-        parser.add_argument("--lr", default=0.001, type=float)
-        parser.add_argument("--method", default="AllDeepSets")
-        parser.add_argument("--dname", default="20newsW100")
         parser.add_argument("--batch", default=False)
         parser.add_argument("--batch_size", default=1024)
         parser.add_argument("--tau_lowerbound", default=0.1, type=float)
@@ -303,130 +227,7 @@ def parser_data():
         parser.add_argument("--batch_size", default=1024)
         parser.add_argument("--tau_lowerbound", default=0.1, type=float)
         parser.add_argument("--m_l", type=float, default=1.0)
-    elif data == "ModelNet40":
-        parser.add_argument("--All_num_layers", default=1, type=int)
-        parser.add_argument(
-            "--MLP_num_layers", default=2, type=int
-        )  # How many layers of encoder
-        parser.add_argument("--feature_noise", default="0.0", type=str)
-        parser.add_argument("--heads", default=8, type=int)  # Placeholder
-        parser.add_argument(
-            "--Classifier_num_layers", default=1, type=int
-        )  # How many layers of decoder
-        parser.add_argument(
-            "--MLP_hidden", default=512, type=int
-        )  # Encoder hidden units
-        parser.add_argument(
-            "--Classifier_hidden", default=128, type=int
-        )  # Decoder hidden units
-        parser.add_argument("--wd", default=0.0, type=float)
-        parser.add_argument("--lr", default=0.001, type=float)
-        parser.add_argument("--method", default="AllDeepSets")
-        parser.add_argument("--dname", default="ModelNet40")
-        parser.add_argument("--batch", default=False)
-        parser.add_argument("--batch_size", default=1024)
-        parser.add_argument("--tau_lowerbound", default=0.1, type=float)
-        parser.add_argument("--m_l", type=float, default=1)
-    elif data == "yelp":
-        parser.add_argument("--All_num_layers", default=1, type=int)
-        parser.add_argument(
-            "--MLP_num_layers", default=2, type=int
-        )  # How many layers of encoder
-        parser.add_argument("--feature_noise", default="0.0", type=str)
-        parser.add_argument("--heads", default=1, type=int)  # Placeholder
-        parser.add_argument(
-            "--Classifier_num_layers", default=1, type=int
-        )  # How many layers of decoder
-        parser.add_argument(
-            "--MLP_hidden", default=64, type=int
-        )  # Encoder hidden units
-        parser.add_argument(
-            "--Classifier_hidden", default=64, type=int
-        )  # Decoder hidden units
-        parser.add_argument("--wd", default=0.0, type=float)
-        parser.add_argument("--lr", default=0.001, type=float)
-        parser.add_argument("--method", default="AllDeepSets")
-        parser.add_argument("--dname", default="yelp")
-        parser.add_argument("--batch", default=True)
-        parser.add_argument("--batch_size", default=1024)
-        parser.add_argument("--node_batch_size", default=1024)
-        parser.add_argument("--tau_lowerbound", default=0.1, type=float)
-        parser.add_argument("--m_l", type=float, default=1)
-    elif data == "house-committees-100_0.6":
-        parser.add_argument("--All_num_layers", default=1, type=int)
-        parser.add_argument(
-            "--MLP_num_layers", default=2, type=int
-        )  # How many layers of encoder
-        parser.add_argument("--feature_noise", default="0.6", type=str)
-        parser.add_argument("--heads", default=1, type=int)  # Placeholder
-        parser.add_argument(
-            "--Classifier_num_layers", default=1, type=int
-        )  # How many layers of decoder
-        parser.add_argument(
-            "--MLP_hidden", default=512, type=int
-        )  # Encoder hidden units
-        parser.add_argument(
-            "--Classifier_hidden", default=256, type=int
-        )  # Decoder hidden units
-        parser.add_argument("--wd", default=0.0, type=float)
-        parser.add_argument("--lr", default=0.001, type=float)
-        parser.add_argument("--method", default="AllDeepSets")
-        parser.add_argument("--dname", default="house-committees-100")
-        parser.add_argument("--batch", default=False)
-        parser.add_argument("--batch_size", default=1024)
-        parser.add_argument("--tau_lowerbound", default=0.1, type=float)
-        parser.add_argument("--m_l", type=float, default=1)
-    elif data == "house-committees-100_1.0":
-        parser.add_argument("--All_num_layers", default=1, type=int)
-        parser.add_argument(
-            "--MLP_num_layers", default=2, type=int
-        )  # How many layers of encoder
-        parser.add_argument("--feature_noise", default="1.0", type=str)
-        parser.add_argument("--heads", default=8, type=int)  # Placeholder
-        parser.add_argument(
-            "--Classifier_num_layers", default=1, type=int
-        )  # How many layers of decoder
-        parser.add_argument(
-            "--MLP_hidden", default=512, type=int
-        )  # Encoder hidden units
-        parser.add_argument(
-            "--Classifier_hidden", default=128, type=int
-        )  # Decoder hidden units
-        parser.add_argument("--wd", default=0.0, type=float)
-        parser.add_argument("--lr", default=0.001, type=float)
-        parser.add_argument("--method", default="AllDeepSets")
-        parser.add_argument("--dname", default="house-committees-100")
-        parser.add_argument("--batch", default=False)
-        parser.add_argument("--batch_size", default=1024)
-        parser.add_argument("--tau_lowerbound", default=0.1, type=float)
-        parser.add_argument("--m_l", type=float, default=1)
-    elif data == "walmart-trips-100":
-        parser.add_argument("--All_num_layers", default=1, type=int)
-        parser.add_argument(
-            "--MLP_num_layers", default=2, type=int
-        )  # How many layers of encoder
-        parser.add_argument("--feature_noise", default=1.0, type=str)
-        parser.add_argument("--heads", default=8, type=int)  # Placeholder
-        # parser.add_argument("--heads", default=1, type=int)
-        parser.add_argument(
-            "--Classifier_num_layers", default=1, type=int
-        )  # How many layers of decoder
-        parser.add_argument(
-            "--MLP_hidden", default=256, type=int
-        )  # Encoder hidden units
-        parser.add_argument(
-            "--Classifier_hidden", default=128, type=int
-        )  # Decoder hidden units
-        parser.add_argument("--wd", default=0.0, type=float)
-        parser.add_argument("--lr", default=0.001, type=float)
-        parser.add_argument("--method", default="AllDeepSets")
-        parser.add_argument("--dname", default="walmart-trips-100")
-        parser.add_argument("--batch", default=True)
-        parser.add_argument("--batch_size", default=2048)
-        parser.add_argument("--node_batch_size", default=20000)
-        parser.add_argument("--tau_lowerbound", default=0.1, type=float)
-        parser.add_argument("--m_l", type=float, default=1)
-    elif data == "twitter-HyDrug":
+    elif data == "Twitter-HyDrug":
         parser.add_argument("--All_num_layers", default=1, type=int)
         parser.add_argument(
             "--MLP_num_layers", default=2, type=int
@@ -445,7 +246,7 @@ def parser_data():
         parser.add_argument("--wd", default=0.0, type=float)
         parser.add_argument("--lr", default=0.001, type=float)
         parser.add_argument("--method", default="AllDeepSets")
-        parser.add_argument("--dname", default="twitter-HyDrug")
+        parser.add_argument("--dname", default="Twitter-HyDrug")
         # parser.add_argument("--batch", default=True)
         parser.add_argument("--batch_size", default=128)
         parser.add_argument("--tau_lowerbound", default=0.2, type=float)
