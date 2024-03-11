@@ -31,8 +31,8 @@ For instance, for benchmark hypergraph dataset cora, please run:
 ```Python
 python main.py --dname cora
 ```
-As shown in Table I, Twitter-HyDrug has relatively large number of hyperedges, and requires large GPU memory for some calculation. We provides an option to move part of calculations to CPUs. Our program will auto detect the dataset, and ask whether move parts of caculation to CPUs. If so, it may take longer for some calculation on CPU. 
-For example:
+As shown in Table I, Twitter-HyDrug has relatively large number of hyperedges, and requires large GPU memory for some calculation. We provides an option to move part of calculations to CPU. Our program will auto detect the dataset, and ask whether move part of calculation to CPU. If so, it may take longer for some calculation on CPU. 
+For example, to reproduce our experiment on Twitter-HyDrug wtih some calculation on CPU, please run:
 ```
 >> python main.py --dname Twitter-HyDrug
 ## "Due to the limited GPU memory, do you want to move some calculations to CPU? (y/n)"
@@ -41,7 +41,7 @@ For example:
 ```
 
 ## Dataset
-We adopt seven benchmark hypergraph datasets. The data statictics are listed in Table I. 
+We adopt seven benchmark hypergraph datasets. The data statistics are listed in Table I. 
 
 <div align="center">
 
