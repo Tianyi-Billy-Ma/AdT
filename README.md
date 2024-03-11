@@ -25,7 +25,7 @@ To reproduce our experiments, simply run:
 ```Python
 python main.py --dname dataset
 ```
-Available datasets are: [ "Twitter-HyDrug", "cora", "citeseer", "coauthor_cora", "Zoo", "Mushroom", "NTU2012"]
+Available datasets are: [ "Twitter-HyDrug", "cora", "citeseer", "coauthor_cora", "zoo", "Mushroom", "NTU2012"]
 
 For instance, for benchmark hypergraph dataset cora, please run:
 ```Python

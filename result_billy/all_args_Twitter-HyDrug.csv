@@ -1,4 +1,0 @@
-Namespace(All_num_layers=1, MLP_num_layers=2, feature_noise='0.0', heads=1, Classifier_num_layers=1, MLP_hidden=128, Classifier_hidden=128, wd=0.0, lr=0.01, method='AllDeepSets', dname='twitter', batch_size=128, m_l=1)
-Namespace(All_num_layers=1, MLP_num_layers=2, feature_noise='0.0', heads=1, Classifier_num_layers=1, MLP_hidden=256, Classifier_hidden=256, wd=0.0, lr=0.01, method='AllDeepSets', dname='twitter', batch_size=128, m_l=1)
-Namespace(All_num_layers=1, MLP_num_layers=2, feature_noise='0.0', heads=1, Classifier_num_layers=1, MLP_hidden=512, Classifier_hidden=256, wd=0.0, lr=0.01, method='AllDeepSets', dname='twitter', batch_size=128, m_l=1, tau_lowbound=0.2)
-Namespace(All_num_layers=1, MLP_num_layers=2, feature_noise='0.0', heads=1, Classifier_num_layers=1, MLP_hidden=512, Classifier_hidden=256, wd=0.0, lr=0.01, method='AllDeepSets', dname='twitter', batch_size=128, m_l=1, tau_lowbound=0.2)
