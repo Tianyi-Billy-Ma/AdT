@@ -376,7 +376,7 @@ def parser_data():
         parser.add_argument("--batch_size", default=1024)
         parser.add_argument("--tau_lowerbound", default=0.1, type=float)
         parser.add_argument("--m_l", type=float, default=1)
-    elif data == "house-committees-100_1.0":
+    elif data == "house-committees-100":
         parser.add_argument("--All_num_layers", default=1, type=int)
         parser.add_argument(
             "--MLP_num_layers", default=2, type=int

@@ -531,7 +531,7 @@ class dataset_Hypergraph(InMemoryDataset):
             "bail",
             "credit",
             "german",
-            "twitter",
+            "twitter-HyDrug",
         ]
         if name not in existing_dataset:
             raise ValueError(
@@ -658,7 +658,7 @@ class dataset_Hypergraph(InMemoryDataset):
                         train_percent=self._train_percent,
                     )
 
-                elif self.name == "twitter":
+                elif self.name == "twitter-HyDrug":
                     tmp_data = load_twitter_data(path=self.p2raw)
 
                 elif self.name in ["bail", "credit", "german"]:
@@ -711,7 +711,7 @@ def load_data(args):
         "cora",
         "citeseer",
         "pubmed",
-        "twitter",
+        "twitter-HyDrug",
     ]
 
     synthetic_list = [
@@ -734,7 +734,7 @@ def load_data(args):
                 p2raw = osp.join(p2raw, "coauthorship")
             elif dname in ["yelp"]:
                 p2raw = osp.join(p2raw, "yelp")
-            elif dname in ["twitter"]:
+            elif dname in ["twitter-HyDrug"]:
                 p2raw = osp.join(p2raw, "twitter")
             dataset = dataset_Hypergraph(
                 name=dname,
