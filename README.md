@@ -45,7 +45,7 @@ We adopt seven benchmark hypergraph datasets. The data statistics are listed in 
 
 <div align="center">
 
-| Dataset   | TWitter-HyDrug | Cora  | Citeseer | Cora-CA | Zoo | Mushroom | NTU2012 |
+| Dataset   | Twitter-HyDrug | Cora  | Citeseer | Cora-CA | Zoo | Mushroom | NTU2012 |
 |-----------|----------------|-------|----------|---------|-----|----------|---------|
 | # nodes       | 2,936          | 2,708 | 3,312    | 2,708   | 101 | 8,124    | 2012    |
 | # hyperedges  | 33,893         | 1,579 | 1,079    | 1,072   | 43  | 298      | 2,012   |
@@ -85,12 +85,11 @@ Table II: Detailed data statistic of Twitter-HyDrug.
 
 ## Augmentations
 
-Available data augmentations are: [ "edge", "hyperedge", "mask", "drop", "subgraph","adapt_feat", "adapt_edge",  "adapt"].  
-For instance, to conduct edge and hyperedge augmentations with augmentation ratio 0.3, please run:
+Our model performs contrastive learning on two augmented hypergraphs, each generated through one of the following augmentation operations: [ "edge", "hyperedge", "mask", "drop", "subgraph","adapt_feat", "adapt_edge",  "adapt"]. For instance, to conduct experiment on edge and hyperedge operations with an augmentation ratio 0.3 over benchmark hypergraph dataset Twitter-HyDrug, please run:
 ```python
-python main.py --dname dataset --aug1 edge --aug2 hyperedge --aug_ratio 0.3
+python main.py --dname Twitter-HyDrug --aug1 edge --aug2 hyperedge --aug_ratio 0.3
 ```
-Detailed discussion about data augmentations are listed in Table III.
+Detailed discussion about hypergraph augmentations are listed in Table III.
 
 <div align="center">
 
@@ -102,9 +101,9 @@ Detailed discussion about data augmentations are listed in Table III.
 |Drop | Drop certain percentage of nodes in the hypergraph. | 
 |Subgraph | Perform random walk to extract a subgraph. | 
 |Adapt Edge| Similar to edge augmentation, but drop edges w.r.t. the corresponding hyperedge degrees. | 
-|Adapt Node | Mask attribute features across dimensions w.r.t. the significance of features dimensions. | 
+|Adapt Node | Mask attribute features across dimensions w.r.t. the significance of features. | 
 | Adapt | Conduct both adapt edge and adapt node augmentations. | 
-<p>Table III: Data augmentations for HyGCL-AdT and corresponding descriptions.</p>
+<p>Table III: Hypergraph augmentations for HyGCL-AdT and corresponding descriptions.</p>
 </div>
 
 
