@@ -27,6 +27,8 @@ python main.py --dname dataset
 ```
 Available datasets are: [ "Twitter-HyDrug", "cora", "citeseer", "coauthor_cora", "zoo", "Mushroom", "NTU2012"]
 
+Available data augmentations are: [ "edge", "mask", "hyperedge", "mask_col", "adapt", "adapt_feat", "adapt_edge"]
+
 For instance, for benchmark hypergraph dataset cora, please run:
 ```Python
 python main.py --dname cora
@@ -58,7 +60,7 @@ We adopt seven benchmark hypergraph datasets. The data statistics are listed in 
 | min $d(v)$ | 0    | 0    | 0        | 0       | 17  | 5        | 1       |
 | avg $d(v)$ | 31.49 | 1.77 | 1.04     | 1.69    | 17  | 5        | 5       |
 
-Table I: Data Statistics of benchmark hypergraph datasets. $d(e)$ and $d(v)$ indicates the degree of hyperedges and nodes, respectively. 
+Table I: Data Statistics of benchmark hypergraph datasets. d(e) and d(v) indicate the degree of hyperedges and nodes, respectively. 
 </div>
 
 
@@ -67,7 +69,7 @@ Table I: Data Statistics of benchmark hypergraph datasets. $d(e)$ and $d(v)$ ind
 We adopt the benchmark hypergraph dataset Twitter-HyDrug from [HyGCL-DC](https://github.com/GraphResearcher/HyGCL-DC). Twitter-HyDrug is a real-world hypergraph data that describes the drug trafficking communities on Twitter. Unlike HyGCL-DC that targets at drug trafficking community detection task (a multi-label node classification), we aim to identify drug user roles in drug trafficking activities on social media. 
 To this end, we categorize node labels into four distinct roles: drug seller, drug buyer, drug user, and drug discussant, and each node is assigned to one and only one label. Consequently, we frame our problem as a multi-class node classification task. 
 
- More detailed statistic of Twitter-HyDrug is listed in Table II.
+More detailed statistic of Twitter-HyDrug is listed in Table II.
 
 <div align="center">
 
@@ -108,8 +110,9 @@ Discussions, suggestions and questions are always welcome!
 
 ### Logger
 
-This is a sample running logger which records the output and the model performance for Cora data:
+We provide the completed running logger for the Twitter-HyDrug data in `./result/Twitter-HyDrug.log`.
 
+Besides, this is a sample running logger which records the output and the model performance for Cora data:
 ```
 Epoch: 00, Train Loss: 18.5445, Valid Loss: 1.8159, Test  Loss: 1.7983, Train Acc: 47.04%, Valid Acc: 33.58%, Test  Acc: 35.07%, Train F1: 29.06%, Valid F1: 19.62%, Test  F1: 20.25%, 
 Epoch: 01, Train Loss: 18.3816, Valid Loss: 1.7099, Test  Loss: 1.6771, Train Acc: 60.00%, Valid Acc: 37.27%, Test  Acc: 39.22%, Train F1: 47.90%, Valid F1: 23.79%, Test  F1: 24.35%, 
