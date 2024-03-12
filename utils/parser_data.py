@@ -31,14 +31,14 @@ def parser_data():
     parser.add_argument(
         "--aug1",
         type=str,
-        default="edge",
-        help="mask|edge|hyperedge|mask_col|adapt|adapt_feat|adapt_edge",
+        default="adapt",
+        help="mask|edge|hyperedge|drop|subgraph|adapt|adapt_feat|adapt_edge",
     )
     parser.add_argument(
         "--aug2",
         type=str,
         default="edge",
-        help="mask|edge|hyperedge|mask_col|adapt|adapt_feat|adapt_edge",
+        help="mask|edge|hyperedge|drop|subgraph|adapt|adapt_feat|adapt_edge",
     )
     parser.add_argument(
         "--edge", type=str, default="sum", help="sum|mean|max|propogate|typical"

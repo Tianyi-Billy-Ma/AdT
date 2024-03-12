@@ -27,8 +27,6 @@ python main.py --dname dataset
 ```
 Available datasets are: [ "Twitter-HyDrug", "cora", "citeseer", "coauthor_cora", "zoo", "Mushroom", "NTU2012"]
 
-Available data augmentations are: [ "edge", "mask", "hyperedge", "mask_col", "adapt", "adapt_feat", "adapt_edge"]
-
 For instance, for benchmark hypergraph dataset cora, please run:
 ```Python
 python main.py --dname cora
@@ -81,11 +79,33 @@ More detailed statistic of Twitter-HyDrug is listed in Table II.
 | Drug discussant| 512        | User-follow-user | 1,609           |
 | Total Nodes    | 2,936      | Total Hyperedges | 33,893          |
 
-Table II: Detailed data statistic of Twitter-HyDrug
+Table II: Detailed data statistic of Twitter-HyDrug.
 </div>
 
 
+## Augmentations
 
+Available data augmentations are: [ "edge", "hyperedge", "mask", "drop", "subgraph","adapt_feat", "adapt_edge",  "adapt"].  
+For instance, to conduct edge and hyperedge augmentations with augmentation ratio 0.3, please run:
+```python
+python main.py --dname dataset --aug1 edge --aug2 hyperedge --aug_ratio 0.3
+```
+Detailed discussion about data augmentations are listed in Table III.
+
+<div align="center">
+
+| Augmentation Type | Description | 
+|-----|------|
+|Edge | Drop part of connections in the converted bipartite graph. |
+|Hyperedge | Drop a certain percentage of hyperedges in the hypergraph. |  
+|Mask | Mask node attribute features for a part of nodes in the hypergraph.| 
+|Drop | Drop certain percentage of nodes in the hypergraph. | 
+|Subgraph | Perform random walk to extract a subgraph. | 
+|Adapt Edge| Similar to edge augmentation, but drop edges w.r.t. the corresponding hyperedge degrees. | 
+|Adapt Node | Mask attribute features across dimensions w.r.t. the significance of features dimensions. | 
+| Adapt | Conduct both adapt edge and adapt node augmentations. | 
+<p>Table III: Data augmentations for HyGCL-AdT and corresponding descriptions.</p>
+</div>
 
 
 ## Contact
